@@ -1,7 +1,10 @@
+
 from flask import Flask, jsonify
 import os
 import boto3
 import logging
+
+
 
 PORT = os.getenv('PORT', 5500)  # environment variables 
 HOST = os.getenv('HOST', '0.0.0.0')
@@ -80,6 +83,54 @@ def upload_test():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# tells python to run the flask server in debug mode
+@app.route('/read-file')
+def read_file():
+    try:
+        s3 = boto3.client('s3')
+        response = s3.get_object(
+            Bucket="max-movies-score-data-99",
+            Key='test.txt'
+        )
+        data = response['Body'].read().decode('utf-8')
+        return jsonify({"content": data})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+@app.route('/list-files')
+def list_files():
+    try:
+        s3 = boto3.client('s3')
+        response = s3.list_objects_v2(
+            Bucket="max-movies-score-data-99"
+        )
+        files = [obj['Key'] for obj in response.get('Contents', [])]
+        return jsonify({"files": files})
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+@app.route('/upload-with-logging')
+def upload_with_logging():
+        try:
+            s3 = boto3.client('s3')
+            bucket_name = "max-movies-score-data-99"
+            test_data = "Test data with logging"
+
+            logger.info(f"Attempting to upload to bucket: {bucket_name}")
+
+            s3.put_object(
+                Bucket=bucket_name,
+                Key='logged_test.txt',
+                Body=test_data
+            )
+
+            logger.info("Upload successful")
+            return jsonify({"message": "File uploaded with logging"})
+
+        except Exception as e:
+            logger.error(f"Upload failed: {str(e)}")
+            return jsonify({"error": str(e)}), 500
+
+
+
+      # tells python to run the flask server in debug mode
 if __name__ == '__main__':
     app.run(host=HOST, port=PORT, debug=True)
