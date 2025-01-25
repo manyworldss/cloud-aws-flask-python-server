@@ -1,4 +1,4 @@
-from flask import Flask, json, jsonify
+from flask import Flask, jsonify
 import os
 import boto3
 import logging
@@ -57,17 +57,29 @@ def create_bucket():
         # Name for  new bucket
         bucket_name = "max-movies-score-data-99"
 
-        # Create the bucket with location constraints
-        s3.create_bucket(Bucket=bucket_name,
-                         CreateBucketConfiguration={
-                             'Location Constraint': 'us east 1' 
-                         })
+        # Create the bucket
+        s3.create_bucket(Bucket=bucket_name,)
         return jsonify({"message": f"Bucket {bucket_name} created successfully"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
 
-# tells python to run the flask server in debug mode 
+@app.route('/upload-test')
+def upload_test():
+    try:
+        s3 = boto3.client('s3')
+        bucket_name ="max-movies-score-data-99"
 
+        # create a simple test file
+        test_data = "This is a test data for our movie scores"
+        s3.put_object(
+            Bucket=bucket_name,
+            Key='test.txt', # file name in s3
+            Body=test_data
+        )
+        return jsonify({"message": "Test file upload successfully"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# tells python to run the flask server in debug mode
 if __name__ == '__main__':
     app.run(host=HOST, port=PORT, debug=True)
