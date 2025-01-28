@@ -8,7 +8,7 @@ This project demonstrates practical DevOps and software engineering capabilities
 - Error handling and logging
 - Environment variable configuration
 
-## Technical Stack
+## Technical Stack -
 - Python/Flask for backend
 - AWS S3 for cloud storage
 - Logging for monitoring
